@@ -1,0 +1,135 @@
+Modelo :
+
+import { Schema, model } from "mongoose";
+
+const clientSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true
+    },
+    gmail: {
+      type: String,
+      required: true,
+      unique: true,
+      match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    },
+    password: {
+      type: String,
+      required: true,
+      minLength: 6
+    },
+    phone: {
+      type: String,
+      required: true,
+      match: /^[0-9]{8}$/
+    },
+    age: {
+      type: Number,
+      required: true,
+      min: 1
+    }
+  },
+  {
+    timestamps: true,
+    strict: false
+  }
+);
+
+export default model("client", clientSchema);
+
+Controlador
+
+const clientController = {};
+import clientModel from "../models/client.js";
+
+clientController.getClients = async (req, res) => {
+  try {
+    const clients = await clientModel.find();
+    res.json(clients);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener los clientes", error });
+  }
+};
+
+clientController.getClientById = async (req, res) => {
+  try {
+    const client = await clientModel.findById(req.params.id);
+    if (!client) {
+      return res.status(404).json({ message: "Cliente no encontrado" });
+    }
+    res.json(client);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener el cliente", error });
+    }
+};
+
+clientController.insertClient = async (req, res) => {
+  const { name, gmail, password, phone, age } = req.body;
+
+  if (!name || !gmail || !password || !phone || !age) {
+    return res.status(400).json({ message: "Todos los campos son obligatorios" });
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(gmail)) {
+    return res.status(400).json({ message: "Formato de email inválido" });
+  }
+
+  const existingClient = await clientModel.findOne({ gmail });
+  if (existingClient) {
+    return res.status(409).json({ message: "El cliente ya está registrado" });
+  }
+  try {
+    const newClient = new clientModel({ name, gmail, password, phone, age });
+    await newClient.save();
+    res.status(201).json({ message: "Cliente guardado" });
+  } catch (error) {
+    res.status(400).json({ message: "Error al guardar el cliente", error });
+  }
+};
+
+
+clientController.deleteClient = async (req, res) => {
+  try {
+    const deletedClient = await clientModel.findByIdAndDelete(req.params.id);
+    if (!deletedClient) {
+      return res.status(404).json({ message: "Cliente no encontrado" });
+    }
+    res.json({ message: "Cliente eliminado" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al eliminar el cliente", error });
+  }
+};
+
+clientController.updateClient = async (req, res) => {
+  const { name, gmail, password, phone, age } = req.body;
+  try {
+    await clientModel.findByIdAndUpdate(
+      req.params.id,
+      { name, gmail, password, phone, age },
+      { new: true }
+    );
+    res.json({ message: "Cliente actualizado" });
+  } catch (error) {
+    res.status(400).json({ message: "Error al actualizar el cliente", error });
+  }
+};
+
+export default clientController;
+ 
+
+app:
+
+import express from "express";
+import clientRoutes from "./src/Routes/clients.js";
+import reservationRoutes from "./src/Routes/reservation.js";
+
+const app = express(); 
+
+app.use(express.json());
+app.use("/api/clients", clientRoutes);
+app.use("/api/reservations", reservationRoutes);
+
+export default app;

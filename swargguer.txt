@@ -1,0 +1,289 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: home-iot-api
+  description: The API for the EatBacon IOT project
+paths:
+  /clients:
+    get:
+      tags:
+        - Clients
+      summary: Obtener todos los clientes
+      operationId: getClients
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+    post:
+      tags:
+        - Clients
+      summary: Crear un nuevo cliente
+      operationId: insertClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '201':
+          description: Cliente creado exitosamente
+        '409':
+          description: Cliente ya registrado
+  '/clients/{id}':
+    get:
+      tags:
+        - Clients
+      summary: Obtener un cliente por ID
+      operationId: getClientById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - schema:
+            type: string
+          in: query
+          name: id
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Cliente no encontrado
+    put:
+      tags:
+        - Clients
+      summary: Actualizar un cliente
+      operationId: updateClient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - schema:
+            type: string
+          in: query
+          name: id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '200':
+          description: Cliente actualizado
+        '404':
+          description: Cliente no encontrado
+    delete:
+      tags:
+        - Clients
+      summary: Eliminar un cliente
+      operationId: 'if}d'
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - schema:
+            type: string
+          in: query
+          name: id
+      responses:
+        '200':
+          description: Cliente eliminado
+        '404':
+          description: Cliente no encontrado
+  /reservations:
+    get:
+      tags:
+        - Reservations
+      summary: Obtener todas las reservas
+      operationId: getReservations
+      responses:
+        '200':
+          description: Lista de reservas
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Reservation'
+    post:
+      tags:
+        - Reservations
+      summary: Crear una nueva reserva
+      operationId: insertReservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationInput'
+      responses:
+        '201':
+          description: Reserva creada exitosamente
+  '/reservations/{id}':
+    get:
+      tags:
+        - Reservations
+      summary: Obtener una reserva por ID
+      operationId: getReservationById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - schema:
+            type: string
+          in: query
+          name: id
+      responses:
+        '200':
+          description: Reserva encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Reservation'
+        '404':
+          description: Reserva no encontrada
+    put:
+      tags:
+        - Reservations
+      summary: Actualizar una reserva
+      operationId: updateReservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - schema:
+            type: string
+          in: query
+          name: id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReservationInput'
+      responses:
+        '200':
+          description: Reserva actualizada
+        '404':
+          description: Reserva no encontrada
+    delete:
+      tags:
+        - Reservations
+      summary: Eliminar una reserva
+      operationId: deleteReservation
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - schema:
+            type: string
+          in: query
+          name: id
+      responses:
+        '200':
+          description: Reserva eliminada
+        '404':
+          description: Reserva no encontrada
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+components:
+  schemas:
+    Client:
+      type: object
+      properties:
+        _id:
+          type: string
+        name:
+          type: string
+        gmail:
+          type: string
+        phone:
+          type: string
+        age:
+          type: integer
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ClientInput:
+      type: object
+      required:
+        - name
+        - gmail
+        - password
+        - phone
+        - age
+      properties:
+        name:
+          type: string
+        gmail:
+          type: string
+          format: email
+        password:
+          type: string
+        phone:
+          type: string
+        age:
+          type: integer
+    Reservation:
+      type: object
+      properties:
+        _id:
+          type: string
+        client:
+          type: string
+        vehicle:
+          type: string
+        service:
+          type: string
+        status:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    ReservationInput:
+      type: object
+      required:
+        - client
+        - vehicle
+        - service
+      properties:
+        client:
+          type: string
+        vehicle:
+          type: string
+        service:
+          type: string
+        status:
+          type: string

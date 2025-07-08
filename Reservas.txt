@@ -1,0 +1,107 @@
+import { Schema, model } from "mongoose";
+
+const reservationSchema = new Schema(
+  {
+    clientId: {
+      type: Schema.Types.ObjectId,
+      ref: "client",
+      required: true,
+    },
+    vehicle: {
+      type: String,
+    },
+    service: {
+      type: String,
+    },
+    status: {
+      type: String,
+    }
+    
+  },
+  {
+    timestamps: true,
+    strict: false,
+  }
+);
+
+export default model("reservation", reservationSchema);
+
+
+controller : 
+
+const reservationController = {};
+import reservationModel from "../models/reservations.js";
+  
+reservationController.getReservations = async (req, res) => {
+  try {
+    const reservations = await reservationModel.find();
+    res.status(200).json(reservations);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+reservationController.getReservationById = async (req, res) => {
+    try {
+        const reservation = await reservationModel.findById(req.params.id);
+        if (!reservation) {
+        return res.status(404).json({ message: "Reserva no encontrada" });
+        }
+        res.status(200).json(reservation);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+reservationController.insertReservation = async (req, res) => {
+  const { client, vehicle, service, status } = req.body;
+
+  if (!client || !vehicle || !service) {
+    return res.status(400).json({ message: "Faltan campos obligatorios" });
+  }
+
+  const vehicleRegex = /^[A-Z0-9\s-]{3,20}$/i;
+  if (!vehicleRegex.test(vehicle)) {
+    return res.status(400).json({ message: "Formato de vehículo inválido" });
+  }
+
+  try {
+    const newReservation = new reservationModel({ client, vehicle, service, status });
+    await newReservation.save();
+    res.status(201).json({ message: "Reserva creada", reservation: newReservation });
+  } catch (error) {
+    res.status(400).json({ message: "Error al crear la reserva", error });
+  }
+};
+
+reservationController.deleteReservation = async (req, res) => {
+    try {
+        const deletedReservation = await reservationModel.findByIdAndDelete(req.params.id);
+        if (!deletedReservation) {
+            return res.status(404).json({ message: "Reserva no encontrada" });
+        }
+        res.status(200).json({ message: "Reserva eliminada" });
+    } catch (error) {
+        res.status(500).json({ message: "Error al eliminar la reserva", error });
+    }
+};
+
+reservationController.updateReservation = async (req, res) => {
+    const { client, vehicle, service, status } = req.body;
+    try {
+        const updatedReservation = await reservationModel.findByIdAndUpdate(
+            req.params.id,
+            { client, vehicle, service, status },
+            { new: true }
+        );
+        if (!updatedReservation) {
+            return res.status(404).json({ message: "Reserva no encontrada" });
+        }
+        res.status(200).json({ message: "Reserva actualizada", reservation: updatedReservation });
+    } catch (error) {
+        res.status(400).json({ message: "Error al actualizar la reserva", error });
+    }
+};
+
+export default reservationController;
+
